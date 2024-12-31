@@ -21,4 +21,13 @@ class Book extends Model
     public function getFotoAttribute($value) {
         return $value ? asset('storage/'.$value) : null;
     }
+
+    public function likes() {
+        return $this->hasMany(Like::class);
+    }
+
+    public function likeCount(){
+        return $this->likes()->count();
+    }
+
 }

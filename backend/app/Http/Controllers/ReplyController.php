@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Reply;
+use App\Models\Like;
+use Illuminate\Http\Request;
 
 class ReplyController extends Controller
 {
@@ -31,13 +32,10 @@ class ReplyController extends Controller
     }
 
     public function show($id) {
-        $reply = Reply::with('user:id,name')->find($id);
-
-        if (!$reply) {
-            return response()->json(['message' => 'Komentar tidak ditemukan'], 404);
-        }
-
-        return response()->json($reply);
+        $reply = Reply::withCount('likes')->findOrFail($id);
+        return response()->json([
+            'reply' => $reply,
+        ]);
     }
 
     public function update(Request $request, $id) {
@@ -75,5 +73,30 @@ class ReplyController extends Controller
 
         $reply->delete();
         return response()->json(['message' => 'Reply deleted successfully']);
+    }
+
+    public function like(Request $request, $id) {
+        $reply = Reply::findOrFail($id);
+        $user = $request->user();
+
+        if ($user->likes()->where('reply_id', $reply->id)->exists()) {
+            return response()->json(['message' => 'Anda sudah menyukai komentar ini']. 400);
+        }
+
+        $user->likes()->create(['reply_id' => $reply->id]);
+
+        return response()->json(['message' => 'Liked successfully']);
+    }
+
+    public function unlike($id) {
+        $like = Like::where('user_id', auth()->id())->where('reply_id', $id)->first();
+
+        if (!$like) {
+            return response()->json(['message' => 'Anda belum menyukai komentar ini'], 400);
+        }
+
+        $like->delete();
+
+        return response()->json(['message' => 'Unliked successfully']);
     }
 }

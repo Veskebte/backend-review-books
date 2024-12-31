@@ -3,29 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Models\Book;
+use App\Models\Like;
 use Illuminate\Http\Request;
+
 
 class BookController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         return response()->json(Book::all(), 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -47,25 +40,19 @@ class BookController extends Controller
         return response()->json($book, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Book $book)
+    public function show($id)
     {
-        //
+        $book = Book::withCount('likes')->findOrFail($id);
+        return response()->json([
+            'book' => $book,
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Book $book)
     {
-        //
+
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, $id)
     {
         $book = Book::find($id);
@@ -97,9 +84,6 @@ class BookController extends Controller
         return response()->json($book, 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy($id)
     {
         $book = Book::find($id);
@@ -111,5 +95,30 @@ class BookController extends Controller
         $book->delete();
 
         return response()->json(['message' => 'Buku sudah dihapus!'], 200);
+    }
+
+    public function like(Request $request, $id) {
+        $book = Book::findOrFail($id);
+        $user = $request->user();
+
+        if ($user->likes()->where('book_id', $book->id)->exists()) {
+            return response()->json(['message' => 'Anda sudah menyukai buku ini']. 400);
+        }
+
+        $user->likes()->create(['book_id' => $book->id]);
+
+        return response()->json(['message' => 'Liked successfully']);
+    }
+
+    public function unlike($id) {
+        $like = Like::where('user_id', auth()->id())->where('book_id', $id)->first();
+
+        if (!$like) {
+            return response()->json(['message' => 'Anda belum menyukai buku ini'], 400);
+        }
+
+        $like->delete();
+
+        return response()->json(['message' => 'Unliked successfully']);
     }
 }
