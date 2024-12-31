@@ -12,15 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('replies', function (Blueprint $table) {
-            // $table->unsignedBigInteger('user_id');
-            // $table->unsignedBigInteger('book_id');
-            // $table->unsignedBigInteger('parent_id')->nullable();
-            // $table->string('content');
-            // $table->timestamps();
-            // $table->foreign('user_id')->references('id')->on('books')->onDelete('cascade');
-            // $table->foreign('book_id')->references('id')->on('books')->onDelete('cascade');
-            // $table->foreign('parent_id')->references('id')->on('replies')->onDelete('cascade');
-
+            $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('book_id')->constrained()->onDelete('cascade');
             $table->string('content');
