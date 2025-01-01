@@ -29,5 +29,4 @@ class Book extends Model
     public function likeCount(){
         return $this->likes()->count();
     }
-
 }
