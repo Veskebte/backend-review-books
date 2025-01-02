@@ -42,10 +42,4 @@ class AuthController extends Controller
             return response()->json(['error' => 'Akun tidak terdaftar'], 401);
         }
     }
-
-    public function logout(Request $request) {
-        $request->user()->currentAccessToken()->delete();
-
-        return response()->json(['message' => 'Logout berhasil'], 200);
-    }
 }
